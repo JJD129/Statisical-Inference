@@ -1,0 +1,64 @@
+---
+title: "Statistical Inference: Simulation Exercise"
+author: "Jennifer Dimaano"
+date: "7/21/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Overview
+This project will compare the exponential distribution in R to the Central Limit Theorem (CLT). Given lambda = 0.2 for all of the simulations the goal is to investigate the distribution of averages of 40 exponentials over a thousand simulations.
+
+## Simulation
+Utilizing the parameters set in the overview three variables are defined: lambda, x, and sim. A seed is set to enable consistency through reproduction. A new variable is created to run the smimulation. The means of exponential simulations are calculated and plotted in the next section.
+```{r, include=TRUE}
+set.seed(123)
+lambda <- 0.2
+x <- 40
+sim <- 1000
+r_sim <- replicate(sim, rexp(x, lambda))
+m_sim <- apply(r_sim, 2, mean)
+# hist(m_sim, breaks = 40, xlim = c(3,7), main = "Means of Exponential Function Simulation")
+```
+
+## Sample mean vs. theoretical mean
+```{r, include=TRUE}
+s_mean <- mean(m_sim)
+print(s_mean)
+t_mean <- 1/lambda
+print(t_mean)
+```
+The mean of the sample is 5.011911 and the theoretical mean is 5, which is very close.
+```{r, include=TRUE}
+hist(m_sim, main="Theoretical versus Sample mean", breaks=20)
+abline(v=mean(m_sim), lwd="4", col="red")
+abline(v=t_mean, lwd="4", col="yellow")
+text(3.6, 90, paste("Sample mean = ", round(mean(m_sim),2), "\n Theoretical mean = 5" ), col="red")
+```
+
+## Sample variance vs. theoretical variance
+Examining the difference between both the sample variance and theoretical variance the values  are close to each other. The code below shows the variance of the sample mean is 0.6004928 and the thoeretical variance of the distribution is 0.625, approximately a 0.02 difference. Upon further investigation, the standard deviation of the sample mean is 0.7749147 and the thoeretical standard deviation of the distribution is 0.7905694. Again only an approximate 0.02 differnce.
+```{r, include=TRUE}
+s_var <- var(m_sim)
+t_var  <- (t_mean)^2 / (x) 
+s_sd <- sd(m_sim)
+t_sd  <- 1/(lambda * sqrt(x))
+```
+## Distribution
+Looking at the distribution both show an approximate normal distribution. The following investigates whether the exponential distribution is approximately normal. Due to CLT, the mean of the sample simulations should follow a normal distribution.
+```{r, include=TRUE}
+hist(m_sim, prob=TRUE, main = "Mean of Exponential Function Simulation", breaks = 40, xlim = c(2,9), xlab = "Simulation Means")
+lines(density(m_sim), lwd=4, col="blue")
+
+# Normal distribution line
+x <- seq(min(m_sim), max(m_sim), length = 2*x)
+y <- dnorm(x, mean = t_mean, sd = t_sd^2)
+lines(x,y, pch = 20, lwd = 2, lty = 2)
+```
+

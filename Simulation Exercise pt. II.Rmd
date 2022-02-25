@@ -1,0 +1,88 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=3)
+library(ggplot2)
+```
+# Overview
+This is the second portion of the project. At this part, the data that is going to be analyzed is the ToothGrowth data in the R datasets package. Project objectives include:
+
+1. Load the ToothGrowth data and perform some basic exploratory data analyses
+2. Provide a basic summary of the data.
+3. Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose. (Only use the techniques from class, even if there's other approaches worth considering)
+4. State your conclusions and the assumptions needed for your conclusions.
+
+
+## Load Data
+_The Effect of Vitamin C on Tooth Growth in Guinea Pigs_
+The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid, VC).
+A data frame with 60 observations on 3 variables: len numeric Tooth length, supp factor Supplement type (VC or OJ), and dose numeric Dose in milligrams.
+```{r, include=FALSE, echo=FALSE}
+library(datasets)
+data(ToothGrowth)
+str(ToothGrowth)
+head(ToothGrowth)
+tail(ToothGrowth)
+summary(ToothGrowth)
+```
+
+**Exploratory Analysis**
+Analyze tooth length relative to supplement and dosage separately. From there try to answer if either dosage or supplements have effects on tooth growth.
+
+```{r, include=TRUE, echo=FALSE}
+# Analyze the Tooth Length (len) relationship to Supplement(supp) independent of dose
+g <- ggplot(aes(x = supp, y = len), data = ToothGrowth) + 
+    geom_boxplot(aes(fill = supp))
+g <- g + labs(title="Fig 1: Tooth Length (len) relationship to Supplement (supp)")
+print(g)
+```
+
+The figure above shows a box plot by supplement relative to length of tooth. Upon initial examinatiopn OJ has a better effect on teeth growth than VC. Now to determine if Dosage has an effect indepedently of supplement.
+
+```{r, include=TRUE, echo=FALSE}
+# Determine if within a Dosage - supplements have different effects on tooth growth
+# Analyze the Tooth Length (len) relationship to Dose (does) independent of Supplement
+g <- ggplot(aes(x = factor(dose), y = len), data = ToothGrowth) + 
+    geom_boxplot(aes(fill = factor(dose)))
+g <- g + labs(title="Fig 2: Tooth Length (len) relationship to Dosage (dose)")
+print(g)
+```
+
+The figure above shows a box plot by supplement relative to length of tooth. A 2.0 mg dose has the best effect on teeth growth followed by 1 mg and lastly by 0.5 mg this does not support the assessment in 1 as there is no correlation. Now to determine if supplement within a certain dosage has an effect.
+
+```{r, include=TRUE, echo=FALSE}
+g <- ggplot(aes(x = supp, y = len), data = ToothGrowth) +
+    geom_boxplot(aes(fill = supp)) + facet_wrap(~ dose)
+g <- g + labs(title="Fig 3: Tooth Length (len) by Supplement (supp) & Dosage (dose)")
+print(g)
+```
+
+The figure above shows a box plot of the length of tooth by supplement and dosage. As dosages increase, the longer the tooth grows. The graph shows the effects of tooth growth are similar for both supplements at 2 mg. While an OJ supplemnt has a better effect on teeth growth than VC looking at the plot at a 0.5 and 1 mg dose.
+
+**Testing using confidence interval and/or hypothesis test**
+Comparing tooth length by supplement using t-test
+```{r, include=TRUE, echo=FALSE}
+t.test(len~supp,data=ToothGrowth)
+```
+The p-value is 0.06, and the confidence interval contains zero. This indicates that we can not reject the null hypothesis that the different supplement types have no effect on tooth length.
+Now looking at the length by dosages using a t-test.
+```{r, include=TRUE, echo=FALSE}
+dose1 <- subset(ToothGrowth, dose %in% c(0.5, 1.0))
+dose2 <- subset(ToothGrowth, dose %in% c(0.5, 2.0))
+dose3 <- subset(ToothGrowth, dose %in% c(1.0, 2.0))
+t.test(len ~ dose, paired = F, var.equal = F, data = dose1)
+```
+```{r, include=TRUE, echo=FALSE}
+t.test(len ~ dose, paired = F, var.equal = F, data = dose2)
+```
+```{r, include=TRUE, echo=FALSE}
+t.test(len ~ dose, paired = F, var.equal = F, data = dose3)
+```
+As can be seen, the p-value of each test was essentially zero and the confidence interval of each test does not cross over zero (0).
+Based on this result we can assume that the average tooth length increases with an inceasing dose, and therefore the null hypothesis can be rejected.
+
+**Conclusion**
+It can be inferred that there is a significant difference between tooth length and dose levels across both delivery methods. An increase in dose level led to longer teeth. Initially it appeared that the delivery method had no significant impact on tooth length, but when controlling for dose level we discovered that there was a significant difference at 0.5mg and 1.0mg, but not at 2.0mg. Based on the analysis above, it appears that orange juice is a better delivery method with a larger impact on tooth length for a given dose of Vitamin C, but above a maximum dose level there is no further improvement
