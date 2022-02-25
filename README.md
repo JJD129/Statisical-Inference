@@ -1,4 +1,4 @@
-# Statisical-Inference
+# Statisical Inference
 
 Simulation exercise 1 will compare the exponential distribution in R to the Central Limit Theorem (CLT). Given lambda = 0.2 for all of the simulations the goal is to investigate the distribution of averages of 40 exponentials over a thousand simulations.
 
